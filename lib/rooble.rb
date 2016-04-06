@@ -35,20 +35,20 @@ module Rooble
   end
 
   module ClassMethods
-    def pages()
+    def pages
       max_records_per_page = ENV['MAX_RECORDS_PER_PAGE'].to_i
       total_record_count = self.count
       return 0 unless total_record_count > 0
       pages = (total_record_count.to_f / max_records_per_page.to_f).ceil
     end
 
-    def paginate(page=1, max_records_per_page=nil)
+    def paginate(page=1)
       page ||= 1
-    
+
       if page.to_i < 0
         raise StandardError.new "Pagination index must be greater than zero"
       end
-    
+
       max_records_per_page = ENV['MAX_RECORDS_PER_PAGE'].to_i
       current_offset = ((page.to_i*max_records_per_page))-max_records_per_page
       records = self.limit(max_records_per_page).offset(current_offset)
@@ -84,11 +84,7 @@ module Rooble
 
       records
     end
-
-    def test
-      puts "Hello there!"         
-    end       
   end
 
-  ActiveRecord::Base.send(:include, Rooble)  
+  ActiveRecord::Base.send(:include, Rooble)
 end
