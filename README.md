@@ -39,6 +39,10 @@ If you want to search for attributes in joint models you would do something like
 
 That would search the first state that has a country named USA. Do note the string notation for the relation.
 
+Oh yes, you can chain the methods so you could do something like paginating search results:
+
+`State.search("USA", "countries.name", join: [:country]).paginate(2)`
+
 That's it for now.
 
 ## Other features
