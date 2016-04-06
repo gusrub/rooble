@@ -30,12 +30,16 @@ There is an extra options hash that you can pass to this method, the options are
 
  * `case_sensitive: false` whether you want to make the search case sensitive. Default is false.
  * `type: all` type of match, beginning, end or the whole string. Default is all.
- * `include` an array of symbols if you want to include other relations on the model
- * `join` an array of symbols if you want to join other relations on the model
+ * `include` an array/hash of symbols if you want to include other relations on the model. Same as with default rails include.
+ * `join` an array/hash of symbols if you want to join other relations on the model. Same as with default rails join.
 
 If you want to search for attributes in joint models you would do something like this:
 
 `State.search("USA", "countries.name", join: [:country]).first`
+
+Or if you want to search for the first city of the USA:
+
+`City.search("USA", "countries.name", join: {state: :country}).first`
 
 That would search the first state that has a country named USA. Do note the string notation for the relation.
 
