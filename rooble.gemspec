@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT'
   spec.date        = Date.today.to_s
   spec.require_paths = ["lib"]
-  spec.files       = ["lib/rooble.rb", "lib/rooble/version.rb"]
+  spec.files       = `git ls-files`.split("\n")
   spec.platform    = Gem::Platform::RUBY
   spec.post_install_message = "Here, have a cookie for installing this wonderful gem: 🍪"
 
