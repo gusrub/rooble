@@ -18,7 +18,7 @@ Then do the usual dance:
 
 ## Using it
 
-First go to `config/initializers/rooble.rb` and setup the default value for `max_records_per_page` to a sane number, you don't want to make it a high number.
+First create a configuration file by running `rails g rooble:config` which will create `config/initializers/rooble.rb` and setup the default value for `max_records_per_page` to a sane number, you don't want to make it a high number.
 
 There are three main methods:
 
