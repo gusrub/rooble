@@ -5,7 +5,7 @@ require 'rooble/version'
 
 Gem::Specification.new do |spec|
   spec.name        = 'rooble'
-  spec.version     = '0.1.0'
+  spec.version     = Rooble::VERSION
   spec.authors     = ["Gustavo Rubio"]
   spec.email       = 'gus@ahivamos.net'
 
