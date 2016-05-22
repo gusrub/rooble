@@ -53,4 +53,4 @@ That's it for now.
 
 ## Other features
 
-I will/may add a view helper to generate the pagination navigation and and initializer for the `MAX_RECORDS_PER_PAGE`. For now just set it yourself on your env vars.
+I will/may add a view helper to generate the pagination navigation.
