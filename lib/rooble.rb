@@ -87,7 +87,7 @@ module Rooble
 
     def search(search_term, fields, options={})
       if search_term.nil?
-        raise StandardError.new "You need to give a search term"
+        raise Rooble::Error.new "You need to give a search term"
       end
 
       if fields.empty?
