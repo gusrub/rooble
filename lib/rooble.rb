@@ -103,7 +103,7 @@ module Rooble
           # set the type of search wether just beginning of string
           # the end or as a whole
           if options.has_key? :match_type
-            case options[:match_type]
+            case options[:match_type].to_s
             when "beginning"
               search_beginning = nil
             when "end"
