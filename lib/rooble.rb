@@ -20,39 +20,6 @@ module Rooble
     yield(configuration) if block_given?
   end
 
-  def self.build_query(search_term, fields, options={})
-
-    # Set whether we want case sensitive search
-    operator = "ILIKE"
-    if options.has_key? :case_sensitive
-      operator = "LIKE" if options[:case_sensitive]
-    end
-
-    search_beginning = "%"
-    search_end = "%"
-    if options.has_key? :type
-      case options[:type]
-      when "beginning"
-        search_end = ""
-      when "end"
-        search_beginning = ""
-      end
-    end
-
-    # Loop through fields and build query
-    query = ""
-    or_cond = ""
-    fields = [].push(fields) unless fields.is_a? Array
-    fields.each_with_index do |v,i|
-      if i > 0
-        or_cond = "OR"
-      end
-      query += " #{or_cond} #{v} #{operator} '#{search_beginning}#{search_term}#{search_end}' "
-    end
-
-    query
-  end
-
   module ClassMethods
     ##
     # Returns the amount of available pages to do pagination.
@@ -85,30 +52,97 @@ module Rooble
     # Searches through records for the given fields
     #
 
-    def search(search_term, fields, options={})
+    def search(fields, search_term, options={})
       if search_term.nil?
         raise Rooble::Error.new "You need to give a search term"
       end
 
-      if fields.empty?
+      if fields.nil? || fields.empty?
         raise Rooble::Error.new "You need to give at least one field to search"
       end
 
       raise Rooble::Error.new("You can only include or join relations, not both!") if ([:include, :join] - options.keys ).empty?
 
-      # Build the query
-      query = Rooble::build_query(search_term, fields, options)
-
+      # check if we are joining/including other models first
       if options.has_key? :include
-        records = self.includes(options[:include]).where(query)
+        model = self.includes(options[:include])
       elsif options.has_key? :join
-        records = self.joins(options[:join]).where(query)
+        model = self.joins(options[:join])
       else
-        records = self.where(query)
+        model = self
       end
 
-      records
+      search_beginning = "%"
+      search_end = "%"
+      fields = [].push(fields) unless fields.is_a? Array
+      search_values = []
+      query = ''
+      case_sensitive = false
+      or_cond = ''
+
+      if options.has_key? :case_sensitive
+        if options[:case_sensitive]
+          case_sensitive = true
+        end
+      end
+
+      fields.each_with_index do |field,index|
+        # set the OR if we have more than one field
+        if index > 0
+          or_cond = "OR"
+        end
+
+        # lets find out if we are looking for the ID, we can't
+        # use like for integers so we use equality instead
+        if field.downcase == "id"
+          # check that the serch term is actually a number
+          operator = "="
+          search_values.push(search_term.to_i)
+        else
+
+          # set the type of search wether just beginning of string
+          # the end or as a whole
+          if options.has_key? :match_type
+            case options[:match_type]
+            when "beginning"
+              search_beginning = nil
+            when "end"
+              search_end = nil
+            when "all"
+              search_beginning = "%"
+              search_end = "%"
+            when "none"
+              search_beginning = nil
+              search_end = nil
+            end
+          end
+
+          # set whether we want case sensitive search
+          case ActiveRecord::Base.connection.adapter_name
+          when "PostgreSQL"
+            case_sensitive ? operator = "LIKE" : operator = "ILIKE"
+            search_value = search_term
+          when "MySQL", "Mysql2", "SQLite"
+            operator = "LIKE"
+            if case_sensitive
+              search_value = search_term
+            else
+              field = "LOWER(#{field})"
+              search_value = search_term.downcase
+            end
+          end
+
+          # downcase the search term if we are doing case insensitive search so
+          # the value of downcasing the column matches
+          search_values.push("#{search_beginning}#{search_value}#{search_end}")
+        end
+
+        query += " #{or_cond} #{field} #{operator} ? "
+      end
+
+      records = model.where(query, *search_values)
     end
+
   end
 
   ActiveRecord::Base.send(:include, Rooble)
