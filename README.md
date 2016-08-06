@@ -137,7 +137,7 @@ You can use the _percent_ sign to do pattern matching just like in SQL given tha
 ```
 
 ``` ruby
- State.search("name", "%Ma", match_type: :end)
+ State.search("name", "%Ma")
  # => Yields 2 results where the value ends with ma: Alabama, Oklahoma
 ```
 
