@@ -72,18 +72,21 @@ module Rooble
         model = self
       end
 
-      search_beginning = "%"
-      search_end = "%"
       fields = [].push(fields) unless fields.is_a? Array
       search_values = []
       query = ''
       case_sensitive = false
       or_cond = ''
+      id_fields = ['id']
 
       if options.has_key? :case_sensitive
         if options[:case_sensitive]
           case_sensitive = true
         end
+      end
+
+      if options.has_key? :id_fields
+        id_fields << options[:id_fields].collect { |id| id.downcase }
       end
 
       fields.each_with_index do |field,index|
@@ -94,29 +97,13 @@ module Rooble
 
         # lets find out if we are looking for the ID, we can't
         # use like for integers so we use equality instead
-        if field.downcase == "id"
-          # check that the serch term is actually a number
+        if id_fields.include? field.downcase
+          # check that the search term is actually a number
+          next unless search_term.to_i > 0
+
           operator = "="
           search_values.push(search_term.to_i)
         else
-
-          # set the type of search wether just beginning of string
-          # the end or as a whole
-          if options.has_key? :match_type
-            case options[:match_type].to_s
-            when "beginning"
-              search_beginning = nil
-            when "end"
-              search_end = nil
-            when "all"
-              search_beginning = "%"
-              search_end = "%"
-            when "none"
-              search_beginning = nil
-              search_end = nil
-            end
-          end
-
           # set whether we want case sensitive search
           case ActiveRecord::Base.connection.adapter_name
           when "PostgreSQL"
@@ -134,7 +121,7 @@ module Rooble
 
           # downcase the search term if we are doing case insensitive search so
           # the value of downcasing the column matches
-          search_values.push("#{search_beginning}#{search_value}#{search_end}")
+          search_values.push("#{search_value}")
         end
 
         query += " #{or_cond} #{field} #{operator} ? "

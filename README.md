@@ -107,9 +107,9 @@ Model.search(fields, search_term, options={})
 There is an extra options hash that you can pass to this method, the options are:
 
  * `case_sensitive: false` whether you want to make the search case sensitive. Default is false. Note that this relies on the database engine defaults so if the column or table schema is set to be case insensitive it won't mater what you set here.
- * `match_type: all` type of match, `beginning`, `end`, `all` string or `none`. Default is all.
  * `include` an array/hash of symbols if you want to include other relations on the model. Same as with default rails include.
  * `join` an array/hash of symbols if you want to join other relations on the model. Same as with default rails join.
+ * `id_fields: nil` an array of strings with id fields that should be considered on the search. This is important because we cannot do `LIKE` searches on integer fields so if you want to search both for text fields and in ID fields this should be set 
 
 **Examples**
 
@@ -129,13 +129,15 @@ Searching for substrings:
 
 Searching for patterns:
 
+You can use the _percent_ sign to do pattern matching just like in SQL given that the database supports it of course:
+
 ``` ruby
- State.search("name", "Ma", match_type: :beginning)
+ State.search("name", "Ma%")
  # => Yields 3 results where the value starts with Ma: Maine, Maryland and Massachusetts
 ```
 
 ``` ruby
- State.search("name", "Ma", match_type: :end)
+ State.search("name", "%Ma", match_type: :end)
  # => Yields 2 results where the value ends with ma: Alabama, Oklahoma
 ```
 
