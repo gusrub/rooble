@@ -99,10 +99,10 @@ module Rooble
         # use like for integers so we use equality instead
         if id_fields.include? field.downcase
           # check that the search term is actually a number
-          next unless search_term.to_i > 0
+          next unless search_term.gsub('%', '').to_i > 0
 
           operator = "="
-          search_values.push(search_term.to_i)
+          search_values.push(search_term.gsub('%', '').to_i)
         else
           # set whether we want case sensitive search
           case ActiveRecord::Base.connection.adapter_name
