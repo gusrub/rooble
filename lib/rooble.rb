@@ -94,7 +94,7 @@ module Rooble
 
         # lets find out if we are looking for the ID, we can't
         # use like for integers so we use equality instead
-        if id_fields.include? field.downcase
+        if id_fields.include? field.downcase.split('.').last
           # check that the search term is actually a number
           next unless search_term.to_s.gsub('%', '').to_i > 0
 
