@@ -98,7 +98,7 @@ Model.search(fields, search_term, options={})
 
  **Arguments:**
 
- - `fields` a string with a field name or string array with field names to make the query against
+ - `fields` a string with a field name or string/symbol array with field names to make the query against
  - `search_term` string with the term to search
  - `options` a hash with a set of options. Please se below for more info.
 

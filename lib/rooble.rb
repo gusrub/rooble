@@ -73,8 +73,9 @@ module Rooble
       end
 
       fields = [].push(fields) unless fields.is_a? Array
+      fields.collect! { |f| f.to_s }
       search_values = []
-      query = ''
+      query = []
       case_sensitive = false
       or_cond = ''
       id_fields = ['id']
@@ -90,19 +91,15 @@ module Rooble
       end
 
       fields.each_with_index do |field,index|
-        # set the OR if we have more than one field
-        if index > 0
-          or_cond = "OR"
-        end
 
         # lets find out if we are looking for the ID, we can't
         # use like for integers so we use equality instead
         if id_fields.include? field.downcase
           # check that the search term is actually a number
-          next unless search_term.gsub('%', '').to_i > 0
+          next unless search_term.to_s.gsub('%', '').to_i > 0
 
           operator = "="
-          search_values.push(search_term.gsub('%', '').to_i)
+          search_values.push(search_term.to_s.gsub('%', '').to_i)
         else
           # set whether we want case sensitive search
           case ActiveRecord::Base.connection.adapter_name
@@ -111,6 +108,8 @@ module Rooble
             search_value = search_term
           when "MySQL", "Mysql2", "SQLite"
             operator = "LIKE"
+            # downcase the search term if we are doing case insensitive search so
+            # the value of downcasing the column matches
             if case_sensitive
               search_value = search_term
             else
@@ -119,15 +118,13 @@ module Rooble
             end
           end
 
-          # downcase the search term if we are doing case insensitive search so
-          # the value of downcasing the column matches
-          search_values.push("#{search_value}")
+          search_values.push("#{search_value.to_s}")
         end
 
-        query += " #{or_cond} #{field} #{operator} ? "
+        query << " #{field} #{operator} ? "
       end
 
-      records = model.where(query, *search_values)
+      records = model.where(query.join(' OR '), *search_values)
     end
 
   end
